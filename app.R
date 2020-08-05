@@ -1,23 +1,20 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-library(shiny)
+packages <- c("shiny", "dplyr", "Seurat", "ggplot2")
+
+for (package in packages) {
+	if (!require(package, character.only = TRUE)) {
+		install.packages(package, dependencies = TRUE)
+		library(package, character.only = TRUE)
+	}
+}
+
+# library(shiny)
+# library(dplyr)
+# library(Seurat)
+# library(ggplot2)
 
 # Stuff that is run once, when the Shiny app launches.
-library(dplyr)
-library(Seurat)
-library(ggplot2)
-
 integrated.0h.1h_4h_16h_27h_36h_48h <- readRDS("data/integrated.0h.1h_4h_16h_27h_36h_48h.rds")
-# This needs to have all its data scaled for future plot generation.
 DefaultAssay(integrated.0h.1h_4h_16h_27h_36h_48h) <- "RNA"
-# Has this already been done?
-#integrated.0h.1h_4h_16h_27h_36h_48h <- ScaleData(integrated.0h.1h_4h_16h_27h_36h_48h)
 
 #RENAME IDENTS TO figure 1 cluster names correlating with UMAP
 cluster_ids <- c('0' = 'S1', '1' = 'S3', '2' = 'S3','3' = 'S1', '4' = 'DCT',
@@ -74,13 +71,8 @@ ui <- fluidPage(
 			)
 		),
 
-		# Show a plot of the generated distribution
+		# Show one or more FeaturePlots
 		mainPanel(
-			# plotOutput("distPlot",
-			# 	width = "auto",
-			# 	height = "500px"
-			# )
-
 			uiOutput("plots") # This is the dynamic UI for the plots
 		)
 	),
@@ -98,7 +90,7 @@ ui <- fluidPage(
 	)
 )
 
-# Define server logic required to draw a histogram
+
 server <- function(input, output) {
 	# Read the gene name from the textInput when the Submit actionButton is used or the time split checkbox is changed.
 	gene <- eventReactive(
